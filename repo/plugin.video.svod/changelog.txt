@@ -1,0 +1,80 @@
+[B]Version: 1.3.0[/B]
+
+03.03.2026
+- Neue Funktionalität: Kategorien in den Globalen Favoriten
+
+01.03.2026
+- Bugfix: Favoriten wurden manchmal doppelt geladen
+- Bugfix: Code aufgeräumt (@staticmethod Duplikat entfernt)
+- Api: json-request verbessert
+
+24.02.2026
+- Neue Einstellung EPG Workers: Stellt ein, wie viele Jobs parallel laufen dürfen, um das EPG zu holen. Eine zu hohe
+  Einstellung kann das System abstürzen lassen.
+
+22.02.2026
+- In der Senderübersicht wird nun immer die laufende Sendung angezeigt (Short_EPG)
+- Ladefunktion Short_EPG optimiert, anstatt sequentiell nun 16fach parallel
+- Portale werden nun auch auf Erreichbarkeit geprüft wenn kein EPG aktiviert ist
+
+14.02.2026
+- Fehlermeldung "Error getting token" wird nun nur noch geloggt. Entsprechende Portale die nicht antworten
+  werden in der Portalübersicht Orange eingefärbt
+- Leere EPG Listen verursachten eine Fehlermeldung
+
+05.02.2026
+- weitere Optimierungen für das EPG caching
+
+03.02.2026
+- Neues Icon Set
+- EPG Background caching optimiert, lädt nun korrekt für alle hinterlegten Portale
+
+01.02.2026
+- Restore des Backups funktioniert nun auch direkt aus Netzwerkfreigaben wie SMB oder NFS
+- Globale Favoriten werden nun gelöscht, wenn ein Portal geleert oder geändert wird.
+
+26.01.2026
+- Globale Favoriten hinzugefügt für TV (mit EPG), VOD, Serien, inklusive Logos, Thumbs und Plots
+- Schalter für Globale Favoriten - für flache Liste (alphabetisch) oder gruppiert nach Portalen
+
+18.01.2026
+- [BugFix] Beim Short EPG wurde immer die nächste anstatt der aktuellen Sendung angezeigt
+
+17.01.2026
+- [BugFix] EPG Pre-Fetch startet nicht
+- [BugFix] Short-EPG bei den einzelnen Sendern hat sich nicht aktualisiert
+- [EPG] Prüfung eingebaut ob EPG veraltet ist
+- [EPG] Logikfehler in Pre-Fetch bereinigt, der zur Kollision mit dem Standard Backgroundservice fürs EPG laden führen konnte
+- weitere Loaklisierungen
+
+16.01.2026
+- EPG hinzugefügt, inklusive Pre-Fetch und Short EPG direkt in der Senderanzeige
+
+14.01.2026
+-Backup Funktion hinzugefügt
+
+13.01.2026
+- Portalen kann auf Wunsch ein eigener Name in den Einstellungen zugewiesen werden
+- Einstellungen sind nun direkt aus dem Menü aufrufbar
+- Globaler Filter für Kategorien hinzugefügt (zB Filter "DE -" zeigt dann nur Kategorien wie "DE - KINO" an
+- Portalfilter für Kategorien hinzugefügt
+- "Oder" Verknüpfung für Filter mit Komma möglich, zB DE -, DE :
+
+To Do: Prüfung per Handshake ob Portal erreichbar ist eingebaut
+
+12.01.2026 (Teil 3)
+- Fix für Favoriten bei VOD und Serien
+- weitere Lokalisierungen
+
+12.01.2026 (Teil 2)
+- Fehler in Anzeige Staffeln behoben
+- API Aufruf für Serien verbessert
+
+12.01.2026
+- Erweiterung auf 10 Portale
+- Englisch als Sprache hinzugefügt
+- Kontextmenüpunkt für Favoriten zweisprachig und eindeutig gemacht (konnte vorher verwechselt werden)
+
+11.01.2026
+ - Erstes Release. Das Plugin basiert auf StalkerVoD, und wurde in der Performance und Stabilität verbessert
+   Caching würde erweitert, bis zu 5 Portale können eingetragen werden, Favoriten getrennt nach Portalen
