@@ -1,4 +1,8 @@
-[B]Version: 1.3.0[/B]
+[B]Version: 1.4.0[/B]
+
+04.03.2026
+- BugFix: Globale Kategorien hatten keinen EPG-Plot
+- Globale Kategorien: Sortierfunktion eingebaut für Sender/Serien/Filme
 
 03.03.2026
 - Neue Funktionalität: Kategorien in den Globalen Favoriten
