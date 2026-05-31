@@ -1,4 +1,31 @@
-[B]Version: 1.4.1[/B]
+[B]Version: 1.5.0[/B]
+
+30.05.2026
+- Fix EPG Darstellung von Sonderzeichen
+- Neues Setting: EPG Zeitversatz pro Portal möglich
+- Fix Short-EPG Anzeige aktuelle Sendung
+- Einige Warnings im Logger auf Debug gesetzt
+
+----------------------------------------------------------------
+Beta-Tree
+29.05.2026
+- Beta: Android Kompatibilität erhöht, open() -> xbmcvfs.file()
+
+28.05.2026
+- Beta: PVR Ausgabe priorisiert, wird vor allen anderen Diensten ausgeführt
+
+25.05.2026
+- Beta: Fix fürs EPG, _format_xmltv_time erweitert
+
+25.05.2026
+- Beta: Kategorien in M3U eingebaut, globale Deduplizierung - Kategorien und Kanäle werden nur einmal angezeigt
+
+25.05.2026
+- Beta: Dialogauswahl für Ausgabepfad hinzugefügt, EPG korrigiert (wurde nicht geschrieben)
+
+24.05.2026
+- Beta: Anbindung an Simple IPTV PVR Client um Kodi internes TV/Radio nutzen zu können
+----------------------------------------------------------------
 
 11.03.2026
 - Bugfix: Abwärtskompatibilität im Database Handler wiederhergestellt

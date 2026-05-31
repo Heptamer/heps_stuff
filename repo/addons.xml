@@ -22,33 +22,6 @@
     </extension>
 </addon>
 
-<addon id="plugin.video.svod" name="xStalkerVoD" version="1.4.1" provider-name="xS-Team">
-	<requires>
-		<import addon="xbmc.python" version="3.0.0" />
-		<import addon="script.module.requests" version="2.25.1" />
-		<import addon="script.module.pydevd" optional="true" />
-	</requires>
-	<extension point="xbmc.python.pluginsource" library="addon_entry.py">
-		<provides>video</provides>
-	</extension>
-	<extension point="xbmc.service" library="service_entry.py" start="startup" />
-	<extension point="xbmc.addon.metadata">
-		<reuselanguageinvoker>true</reuselanguageinvoker>
-		<platform>all</platform>
-		<summary lang="de_DE">Stalker VOD Client</summary>
-		<description lang="de_DE">Stalker Client für TV und VoD</description>
-		<license>GPL-3.0-or-later</license>
-		<language>de_DE</language>
-		<assets>
-			<icon>resources/media/icon.png</icon>
-			<screenshot>resources/screenshots/screenshot_1.png</screenshot><screenshot>resources/screenshots/screenshot_2.png</screenshot><screenshot>resources/screenshots/screenshot_3.png</screenshot><screenshot>resources/screenshots/screenshot_4.png</screenshot><screenshot>resources/screenshots/screenshot_5.png</screenshot><screenshot>resources/screenshots/screenshot_6.png</screenshot></assets>
-		<news>
-v1.0.0  (2026-01-11)
-- Release based on Stalker VoD. Added optimizations for performance and stability. Caching, 5 Portals, Favorites
-		</news>
-	</extension>
-</addon>
-
 <addon id="script.module.cloudrequest"
        name="CloudRequest"
        version="1.0.2"
@@ -101,6 +74,145 @@ v1.0.0  (2026-01-11)
             <fanart>fanart.jpg</fanart>
         </assets>
     </extension>
+</addon>
+
+<addon id="plugin.video.svod" name="xStalkerVoD" version="1.5.0" provider-name="xS-Team">
+	<requires>
+		<import addon="xbmc.python" version="3.0.0" />
+		<import addon="script.module.requests" version="2.25.1" />
+		<import addon="script.module.pydevd" optional="true" />
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="addon_entry.py">
+		<provides>video</provides>
+	</extension>
+	<extension point="xbmc.service" library="service_entry.py" start="startup" />
+	<extension point="xbmc.addon.metadata">
+		<reuselanguageinvoker>true</reuselanguageinvoker>
+		<platform>all</platform>
+		<summary lang="de_DE">Stalker VOD Client</summary>
+		<description lang="de_DE">Stalker Client für TV und VoD</description>
+		<license>GPL-3.0-or-later</license>
+		<language>de_DE</language>
+		<assets>
+			<icon>resources/media/icon.png</icon>
+			<screenshot>resources/screenshots/screenshot_1.png</screenshot><screenshot>resources/screenshots/screenshot_2.png</screenshot><screenshot>resources/screenshots/screenshot_3.png</screenshot><screenshot>resources/screenshots/screenshot_4.png</screenshot><screenshot>resources/screenshots/screenshot_5.png</screenshot><screenshot>resources/screenshots/screenshot_6.png</screenshot></assets>
+		<news>
+[B]Version: 1.5.0[/B]
+
+30.05.2026
+- Fix EPG Darstellung von Sonderzeichen
+- Neues Setting: EPG Zeitversatz pro Portal möglich
+- Fix Short-EPG Anzeige aktuelle Sendung
+- Einige Warnings im Logger auf Debug gesetzt
+
+----------------------------------------------------------------
+Beta-Tree
+29.05.2026
+- Beta: Android Kompatibilität erhöht, open() -&gt; xbmcvfs.file()
+
+28.05.2026
+- Beta: PVR Ausgabe priorisiert, wird vor allen anderen Diensten ausgeführt
+
+25.05.2026
+- Beta: Fix fürs EPG, _format_xmltv_time erweitert
+
+25.05.2026
+- Beta: Kategorien in M3U eingebaut, globale Deduplizierung - Kategorien und Kanäle werden nur einmal angezeigt
+
+25.05.2026
+- Beta: Dialogauswahl für Ausgabepfad hinzugefügt, EPG korrigiert (wurde nicht geschrieben)
+
+24.05.2026
+- Beta: Anbindung an Simple IPTV PVR Client um Kodi internes TV/Radio nutzen zu können
+----------------------------------------------------------------
+
+11.03.2026
+- Bugfix: Abwärtskompatibilität im Database Handler wiederhergestellt
+
+04.03.2026
+- BugFix: Globale Kategorien hatten keinen EPG-Plot
+- Globale Kategorien: Sortierfunktion eingebaut für Sender/Serien/Filme
+
+03.03.2026
+- Neue Funktionalität: Kategorien in den Globalen Favoriten
+
+01.03.2026
+- Bugfix: Favoriten wurden manchmal doppelt geladen
+- Bugfix: Code aufgeräumt (@staticmethod Duplikat entfernt)
+- Api: json-request verbessert
+
+24.02.2026
+- Neue Einstellung EPG Workers: Stellt ein, wie viele Jobs parallel laufen dürfen, um das EPG zu holen. Eine zu hohe
+  Einstellung kann das System abstürzen lassen.
+
+22.02.2026
+- In der Senderübersicht wird nun immer die laufende Sendung angezeigt (Short_EPG)
+- Ladefunktion Short_EPG optimiert, anstatt sequentiell nun 16fach parallel
+- Portale werden nun auch auf Erreichbarkeit geprüft wenn kein EPG aktiviert ist
+
+14.02.2026
+- Fehlermeldung "Error getting token" wird nun nur noch geloggt. Entsprechende Portale die nicht antworten
+  werden in der Portalübersicht Orange eingefärbt
+- Leere EPG Listen verursachten eine Fehlermeldung
+
+05.02.2026
+- weitere Optimierungen für das EPG caching
+
+03.02.2026
+- Neues Icon Set
+- EPG Background caching optimiert, lädt nun korrekt für alle hinterlegten Portale
+
+01.02.2026
+- Restore des Backups funktioniert nun auch direkt aus Netzwerkfreigaben wie SMB oder NFS
+- Globale Favoriten werden nun gelöscht, wenn ein Portal geleert oder geändert wird.
+
+26.01.2026
+- Globale Favoriten hinzugefügt für TV (mit EPG), VOD, Serien, inklusive Logos, Thumbs und Plots
+- Schalter für Globale Favoriten - für flache Liste (alphabetisch) oder gruppiert nach Portalen
+
+18.01.2026
+- [BugFix] Beim Short EPG wurde immer die nächste anstatt der aktuellen Sendung angezeigt
+
+17.01.2026
+- [BugFix] EPG Pre-Fetch startet nicht
+- [BugFix] Short-EPG bei den einzelnen Sendern hat sich nicht aktualisiert
+- [EPG] Prüfung eingebaut ob EPG veraltet ist
+- [EPG] Logikfehler in Pre-Fetch bereinigt, der zur Kollision mit dem Standard Backgroundservice fürs EPG laden führen konnte
+- weitere Loaklisierungen
+
+16.01.2026
+- EPG hinzugefügt, inklusive Pre-Fetch und Short EPG direkt in der Senderanzeige
+
+14.01.2026
+-Backup Funktion hinzugefügt
+
+13.01.2026
+- Portalen kann auf Wunsch ein eigener Name in den Einstellungen zugewiesen werden
+- Einstellungen sind nun direkt aus dem Menü aufrufbar
+- Globaler Filter für Kategorien hinzugefügt (zB Filter "DE -" zeigt dann nur Kategorien wie "DE - KINO" an
+- Portalfilter für Kategorien hinzugefügt
+- "Oder" Verknüpfung für Filter mit Komma möglich, zB DE -, DE :
+
+To Do: Prüfung per Handshake ob Portal erreichbar ist eingebaut
+
+12.01.2026 (Teil 3)
+- Fix für Favoriten bei VOD und Serien
+- weitere Lokalisierungen
+
+12.01.2026 (Teil 2)
+- Fehler in Anzeige Staffeln behoben
+- API Aufruf für Serien verbessert
+
+12.01.2026
+- Erweiterung auf 10 Portale
+- Englisch als Sprache hinzugefügt
+- Kontextmenüpunkt für Favoriten zweisprachig und eindeutig gemacht (konnte vorher verwechselt werden)
+
+11.01.2026
+ - Erstes Release. Das Plugin basiert auf StalkerVoD, und wurde in der Performance und Stabilität verbessert
+   Caching würde erweitert, bis zu 5 Portale können eingetragen werden, Favoriten getrennt nach Portalen
+		</news>
+	</extension>
 </addon>
 
 </addons>
