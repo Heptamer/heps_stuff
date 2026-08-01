@@ -1,0 +1,105 @@
+v1.3.2 (2026-08-01)
+- Golden Master / Release
+
+v1.3.2b (2026-08-01)
+- Change: "Fresh Start" renamed to "Reset Kodi to factory defaults"; the menu item is now disabled by default (new setting, default off) and shows a clear warning that Kodi is completely reset except XSCleaner
+- Change: Unused language cleanup moved from Addon Leftovers to Package Cleanup; it now depends on "Clean Packages" and is displayed directly beneath it in the settings
+- Fix: Dashboard Temp/Cache sizes counted preserved log files (kodi.log etc.) that are never cleaned; sizes now reflect the actually cleanable space
+- Fix: Startup Manager showed every service addon as disabled (enabled state read from the wrong JSON-RPC level)
+- Fix: Backup restore writes settings, databases and addon data back to the correct userdata location (was restoring to the Kodi home root)
+- Fix: Fresh Start preserved the wrong directories and could delete the XSCleaner addon itself; addons/ dir and protected addons are now always kept
+- Fix: Database orphan cleanup used invalid SQL (GROUP BY *) which silently failed; rewritten with quoted column dedupe
+- Fix: Celebrity/Artist cache cleanup deleted the real actorlink table; now only celebrity/artist tables are cleared
+- Fix: Favorites Manager flagged valid favorites as broken (RunAddon args, ActivateWindow "return"/"noop" parameters); target extraction rewritten
+- Fix: Orphan artwork cleanup treated image:// and http(s):// URLs as missing on disk; remote/special URLs are now preserved
+- Fix: Auto-update check crashed on version suffixes (e.g. 1.3.1b); now parsed correctly and actually invoked by the service
+- Fix: Search history cleanup never matched Kodi's XML and did nothing; recent searches are now cleared correctly
+- Fix: "Addons + Data" backup type contained only addon data; now includes addons and addon data
+- Fix: Performance tips matched hardcoded English names against localized labels and never showed in German; now matched by string ID
+- Fix: Addon Leftovers menu item is hidden when both related settings are disabled
+- Fix: Unimplemented "Skins" backup type removed from the backup menu
+- Fix: maxtempo default raised to 1.6 to match its allowed minimum; Kodi version fallback adjusted
+- Fix: Addon startup manager parses the JSON-RPC response properly (enabled state), no longer fails on "enabled": true formatting
+- Fix: Kodi version detection no longer crashes when System.BuildVersion is unavailable
+- Fix: Sources check parses sources.xml only once and writes valid UTF-8 XML with indentation (Kodi 19 compatible)
+- Fix: Advanced settings XML written with UTF-8 declaration; indentation falls back gracefully on Python 3.8 (ET.indent missing)
+- Fix: Crash log subfolders are only removed when they actually contain .dmp/.crash files; freed space for subfolders now counted correctly
+- Fix: Log viewer reads only the last 50 kB of a log instead of the whole file
+- Fix: Dashboard total now shows the actual home folder size (was sum of components)
+- Fix: Auto cleanup is skipped when Kodi shuts down during the startup delay (service abort respected)
+- Perf: Dashboard storage sizes cached for 10 minutes, invalidated after cleanups and service runs
+- Perf: Thumbnail database rows deleted in batches of 500 (IN clause) instead of one statement per file
+- Perf: Duplicate-row cleanup skips tables with more than 500k rows and logs processing time
+- Perf: Empty-folder cleanup stops early when a pass removed nothing
+- Cleanup: Removed 53 unused localization strings, _get_temp_size duplication, updater dead ImportError branch, EXCLUDES + ADDON_ID duplicates
+- Cleanup: Removed dead code (unused size helpers, test_logging, remove_dir/remove_file, set_setting, select_dialog, get_file_count, EXCLUDES_CLEAN, LOG_PRESERVE, BUFFER_MODE_LABELS)
+- Cleanup: Unified logging through utils.log (was four different implementations)
+- Cleanup: Addon/Dialog/Progress singletons in utils are now created lazily
+- Cleanup: Startup Manager JSON-RPC built via json.dumps (no more string concatenation)
+- Cleanup: Removed all unused imports and duplicate storage-info code
+
+v1.3.1b (2026-07-30)
+- Change: Database optimization now requires a configured backup path
+- Change: Database backups during optimization use Backup & Restore system format
+- Fix: Backups are now stored in the configured backup_path (xscleaner_databases_*)
+- Fix: Backup during optimization is actually executed (was silently skipped)
+
+v1.3.0b (2026-07-30)
+- New: HTTP/Image cache cleanup as sub-option of Cache Cleanup
+- New: Weather addon cache cleanup as sub-option of Cache Cleanup
+- New: Downloads cleanup as sub-option of Cache Cleanup
+- New: Search history cleanup as sub-option of Cache Cleanup
+- New: Celebrity/Artist cache cleanup in Database Optimize
+- New: Textures13.db rebuild (backup + delete) in Database Optimize
+- New: Unused language file cleanup in Addon Leftovers
+- New: Favorites Manager – detect and remove broken favorites entries
+- New: Performance tips displayed in System Info dashboard
+- New: System addon protection (scan special://xbmc/addons to prevent deletion of peripheral.*, skin.* etc.)
+- New: Remote URL support in Sources Check (skips os.path.exists for http://, smb:// etc.)
+- New: remove_empty_folders centralized in utils.py, auto-runs after cache/addon cleanups
+- Change: Cache sub-options (HTTP, weather, downloads, search) are dependencies of Clean Cache
+- Fix: Remove empty folders reusable across modules
+
+v1.2.0b (2026-07-29)
+- New: TMDBHelper cache database cleanup integrated into Database Optimize
+- New: db_clean_tmdbhelper setting (Database Options)
+- Fix: Database Optimize sub-dialog now only shows options whose settings are enabled
+
+v1.1.0b (2026-07-28)
+- Activity logging with SQLite database (two-level UI: list + details)
+- All cleanup modules now call log_action() with detail_paths
+- Version-aware advanced settings editor (Kodi 19-20: cache settings, 21+: deprecation notice)
+- Single-page advanced settings menu with help texts and looping dialog
+- RAM detection for auto-calculating cache values
+- Settings now actually control behavior (is_setting_enabled helper)
+- Disabled cleanup menu items hidden from main menu
+- Service respects all settings (has_work check)
+- Network/Video/Samba settings added to advancedsettings editor
+- New auto_cleanup_interval_days setting (0-30 days, prevents repeated cleanup)
+- Cross-platform cache cleanup rewritten (temp, addon_data caches/temps, addons temp)
+- All hardcoded English strings replaced with get_localized_string()
+- German umlauts corrected throughout
+- yesno_dialog and _format_bool use localized button labels
+- RAM detection now parses "MB" suffix correctly
+- Cache dialog duplicate heading fixed
+- Service log level reduced to LOGINFO
+- Activity log DB schema migration (ALTER TABLE ADD COLUMN)
+- README.md with comprehensive two-language documentation
+
+v1.0.0b (2026-07-26)
+- Initial release
+- Cache & Temp cleanup
+- Thumbnails cleanup (unused, old, orphan)
+- Addon leftover removal
+- Package cleanup
+- Crash log cleanup
+- Database optimization (VACUUM, integrity check)
+- Advanced Settings editor
+- Backup / Restore
+- Fresh Start
+- Dashboard with storage overview
+- Log Viewer
+- Startup Manager
+- System Info
+- Auto cleanup service
+- German and English language support
