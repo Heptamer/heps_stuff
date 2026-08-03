@@ -1,3 +1,43 @@
+v1.3.5 (2026-08-03)
+- Change: Backups are now stored as a single ZIP archive per backup type — built locally, verified, and uploaded as one file; no more per-file transfers that can hang on slow or dropped SMB/NFS/FTP shares
+- New: Restore downloads and verifies the ZIP (checksum test + size match), extracts it to a staging folder, and then swaps the restored data in atomically — a failed or cancelled restore leaves the original data untouched
+- Fix: All network file operations (stat, listdir, mkdirs, copy, delete, write test) now run with per-operation timeouts and report failures instead of hanging when a share drops mid-transfer
+- Change: Backup format changed to ZIP — older folder-based backups are no longer listed or restorable (not backward compatible by design)
+- Fix: A backup that fails to upload is removed from the share instead of leaving a partial copy behind; retention now deletes old ZIP files
+- Fix: Backups no longer report a failure when optional files are missing (e.g. advancedsettings.xml, which Kodi only creates on demand) — such items are skipped and logged instead of aborting the backup; vfs type/size checks for local paths now use os.path and no longer misdetect missing files as regular files
+- Perf: File modification times are preserved in the archive and backup/restore show byte-based progress that can be cancelled from the dialog
+- Fix: "Clean ALL thumbnails" reported "0.0 B freed" even though everything was deleted — os.walk ran top-down and each subfolder of the Thumbnails directory was removed wholesale via shutil.rmtree before the walk descended into it, so the files inside (where all thumbnails live in Kodi) were never counted; the cleanup now walks bottom-up, counts and deletes each file, then only removes the now-empty folders, so the freed space is reported correctly
+- Fix: Crash log cleanup now also removes Kodi's own crash logs — kodi_crashlog-<date>_<time>.log in the Kodi data folder root (special://home/, e.g. ~/.kodi or ~/.var/app/tv.kodi.Kodi/data), plus kodi_crashlog-*.log and the kodi_crash.log symlink in the temp folder (special://temp/, e.g. LibreELEC's /storage/.kodi/temp); previously only .dmp/.crash dumps in userdata/crashlogs were removed, so the Linux crash logs in the .kodi root folder were never deleted; crash logs are only removed as files (no directories), and the confirmation text now describes the actual scope
+
+v1.3.4 (2026-08-02)
+- New: Backup & Restore now uses Kodi's VFS (xbmcvfs) and supports network shares (smb://, nfs://, ftp://) as backup destination — previously only local paths worked
+- New: "Select backup folder" in the Backup & Restore menu opens a custom folder browser listing the local filesystem, configured Kodi sources (including network sources from the file manager), browsable SMB/NFS/FTP locations and a manual path entry; the chosen path is saved as the backup path
+- Fix: Backup path starting with special:// is resolved before use; a non-writable backup path now shows an error and aborts instead of failing silently
+- Fix: Write test now really verifies the write result and file creation — a share that creates folders but rejects file writes is now correctly reported as "not writable"
+- Fix: Addon logging works again on Kodi 19+ — xbmc.LOGNOTICE was removed in Kodi 19 and caused every log() call to fail silently (the addon had not logged anything since v1.1.0b on Kodi 19/20/21)
+- Fix: Error log entries now use LOGERROR instead of the semantically wrong LOGFATAL level
+- Change: Write test now retries in a subfolder when the folder itself rejects file writes (folders can be created while file creation is denied by share ACLs) and verifies the result via a fresh directory listing
+- Fix: Backups copied no files to the share (folders only) when the source was a local folder — xbmcvfs exists/stat silently failed on the local directory path while os.path worked; vfs existence/type/size/listdir/mkdirs checks now fall back to os.path for local paths
+- Fix: File copies to the share failed for every file with "utf-8 codec can't decode byte ... invalid continuation byte" — xbmcvfs.File.read() decodes the file as UTF-8 (raises on binary data like .db/.bak); copies now read binary-safe via readBytes() for network sources and plain binary open() for local sources, so database backups actually reach the share
+- Fix: Backups started from the Backup & Restore menu aborted with "cannot create directory" even though the backup folder was created on the share — xbmcvfs.mkdirs() returns CDirectory::Exists(), which uses Kodi's directory cache and can report False for a just-created SMB directory; the vfs mkdirs fallback now verifies the directory directly (cache-bypassing exists check plus parent listing retry) before reporting failure
+- Fix: xbmcvfs.stat() does not exist in Kodi 21 (it is the xbmcvfs.Stat class); vfs stat checks now use xbmcvfs.Stat(path) so file/folder type and size are detected correctly on network paths too (needed for restoring from a share and for the write test on shares)
+- Change: Backup now logs every item with src, exists/isfile/isdir and the copy result — an empty backup can no longer hide the cause
+- Change: Backup and restore can now be cancelled via the progress dialog's Cancel button — a cancelled run stops copying immediately and reports that it was cancelled instead of claiming success
+- Change: Backups no longer include __pycache__ directories and .pyc files (Python addon bytecode) — smaller, faster full backups; filtering is applied consistently to file counting and copying so progress/verification stay exact
+- New: The backup folder can now be chosen from the addon settings (Backup category) — the same SMB/NFS/FTP-capable folder browser is launched via an action button instead of Kodi's limited native path dialog (the native row is hidden; the chosen path is pre-selected when the browser opens)
+- Fix: Log Viewer strings (#32405-#32409) no longer collide with the backup progress/verification strings (#32400-#32404) that were introduced in this version — "No log directory found", "Log Viewer" etc. were shown as backup texts and vice versa
+- Fix: Backup folder browser could not return to the top-level overview (local drives, sources, SMB/NFS/FTP, manual path) from network roots — a ".." entry now leads back to the overview, e.g. when the browser starts at the stored backup path
+- Fix: Selecting a backup folder on SMB/NFS shares no longer falsely reports "not writable" — the write test verified the freshly written probe file via Kodi's directory listing (xbmcvfs.listdir), which is cached and can be stale right after the write (the write itself succeeded, the listing just did not show the file yet); the probe is now verified directly via a cache-bypassing exists check (with retry in case the listing is delayed) instead of the directory listing
+- Fix: After choosing the backup folder from the addon settings the settings window stays open — the "Select backup folder" button previously used RunAddon, which renders the plugin URL as a (empty) directory list after the addon finished, leaving the user on a blank Kodi window; the button now uses RunPlugin (no directory render) and no longer closes the settings dialog, so it returns to the Backup settings after selection
+- New: The backup folder browser now shows the current folder path in the dialog header instead of a static title, so you always see where you are; credentials in remote URLs (e.g. smb://user:pass@host/...) are hidden in the header for display only
+
+v1.3.3 (2026-08-02)
+- Fix: Favorites Manager now finds Kodi's favourites.xml — the file was previously searched under the wrong name (favorites.xml) and never found
+- Fix: Favorites Manager parses the actual favourites.xml structure (name attribute, command in element text) instead of a non-existent onclick attribute
+- Fix: Favorites Manager splits command arguments correctly so paths containing commas are no longer misparsed
+- Fix: Addon leftovers confirmation now describes the actual behavior (only removes data of uninstalled addons and invalid addon folders, installed addons stay untouched)
+- New: Backup retention — per backup type only the newest X backups are kept (slider 1-30, 0 = off, default 10); the oldest backups are removed after a new backup was created successfully
+
 v1.3.2 (2026-08-01)
 - Golden Master / Release
 
