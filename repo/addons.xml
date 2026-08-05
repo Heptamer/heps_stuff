@@ -215,7 +215,7 @@ To Do: Prüfung per Handshake ob Portal erreichbar ist eingebaut
 	</extension>
 </addon>
 
-<addon id="script.xscleaner" name="xSCleaner" version="1.3.5" provider-name="xS-Team">
+<addon id="script.xscleaner" name="xSCleaner" version="1.3.7" provider-name="xS-Team">
   <requires>
     <import addon="xbmc.python" version="3.0.0" />
   </requires>
@@ -234,86 +234,69 @@ To Do: Prüfung per Handshake ob Portal erreichbar ist eingebaut
     <platform>all</platform>
     <license>GPL-2.0-or-later</license>
     <source>https://github.com/xscleaner/script.xscleaner</source>
-    <news>v1.3.5
-- Change: Backups are now stored as a single ZIP archive per backup type — no more per-file transfers that can hang on slow or dropped SMB/NFS/FTP shares
-- New: Restore now downloads and verifies the ZIP, then swaps the restored data in atomically — a failed restore leaves the original data untouched
-- Fix: All network file operations now run with timeouts and report failures instead of hanging when a share drops mid-transfer
-- Change: Backup format is now ZIP; older folder-based backups are no longer listed or restorable
-- Fix: A backup that fails to upload is removed from the share instead of leaving a partial copy behind
-- Fix: Backups no longer fail when optional files are missing (e.g. advancedsettings.xml) — such items are skipped and logged
-- Perf: File modification times are preserved in the archive and backup/restore show byte-based progress that can be cancelled
-- Fix: "Clean ALL thumbnails" no longer reports 0 bytes freed after deleting everything — files inside the Thumbnails subfolders were removed via folder deletion and never counted, so the notification showed "0.0 B" despite hundreds of MB being freed
-- Fix: Crash log cleanup now also removes Kodi's own crash logs (kodi_crashlog-*.log, kodi_crash.log) from the Kodi home and temp folders — previously only .dmp/.crash dumps in userdata/crashlogs were removed
+    <news>v1.3.7
+- New: Scheduled automatic full backups with configurable interval and hour, run silently by the service
+- New: Missed scheduled backups are offered at the next Kodi start
+- Fix: Backup folder browser showed files instead of subfolders (wrong element of xbmcvfs.listdir read)
+- New: "Choose this folder" as first highlighted browser entry, "Edit Backup Path" jump, pre-filled manual path input
+- New: Progress dialog while navigating SMB/NFS/FTP folders and during the network write check
+- Change: Hidden system folders starting with "@" are hidden in the folder browser
+v1.3.6
+- New: Addon Storage — browse addons and addon data by disk usage (sizes cached)
+- Change: Dashboard sizes always measured fresh; main menu no longer cached by Kodi
+v1.3.5
+- Change: Backups are single ZIP archives — no more per-file transfers that hang on slow shares
+- New: Restore downloads, verifies and swaps data in atomically; failures leave data untouched
+- Fix: Network operations run with timeouts instead of hanging on dropped shares
+- Change: ZIP backup format (older folder backups no longer restorable)
+- Fix: Failed uploads are removed; retention cleans old ZIPs
+- Fix: Missing optional files are skipped instead of aborting the backup
+- Perf: Timestamps preserved; byte-based, cancellable backup/restore progress
+- Fix: "Clean ALL thumbnails" reports the correct freed space
+- Fix: Crash log cleanup also removes Kodi's own crash logs
 v1.3.4
-- New: Backup &amp; Restore now supports network shares (smb://, nfs://, ftp://)
-- New: Backup folder can be selected via folder browser (local folders, configured sources, SMB/NFS/FTP, manual path)
-- Fix: Addon logging works again on Kodi 19+ (xbmc.LOGNOTICE was removed in Kodi 19, causing every log call to fail silently)
-- Fix: Backups copy their contents again — vfs checks on local source folders now fall back to os.path when xbmcvfs stat/exists fails
-- Fix: Network file copies no longer fail with "utf-8 codec can't decode byte" — binary data (.db/.bak) is now streamed binary-safe (readBytes for network sources, plain binary read for local sources)
-- Fix: Backups no longer abort with "cannot create directory" on network shares — the created folder is now verified directly (Kodi's mkdirs cache check is unreliable for SMB); file/folder type and size on shares now use the xbmcvfs.Stat class
-- Perf: Backup and restore can now be cancelled from the progress dialog
-- Change: Backups no longer include __pycache__ directories and .pyc files — smaller and faster full backups
-- New: The backup folder can be chosen directly from the addon settings (Backup category) using the same SMB/NFS/FTP folder browser as in the Backup &amp; Restore menu — replaces Kodi's limited native path dialog
-- Fix: Log Viewer localization strings no longer collide with the new backup/restore strings
-- Fix: Backup folder browser can return to the top-level overview (drives, sources, SMB/NFS/FTP) from network roots
-- Fix: Choosing a backup folder on SMB/NFS shares no longer falsely reports "not writable" — the write test now verifies the probe file via a direct stat instead of Kodi's cached directory listing
-- Fix: The backup folder button in the settings no longer leaves a blank Kodi window — it now runs the browser via RunPlugin and keeps the settings dialog open, returning to it after selection
-- New: The backup folder browser shows the current folder path in the dialog header (network credentials are hidden)
+- New: Backup &amp; Restore supports network shares (smb://, nfs://, ftp://)
+- New: Custom backup folder browser (local, sources, SMB/NFS/FTP, manual path)
+- Fix: Logging works again on Kodi 19+; binary files copy correctly to shares
+- Fix: Share folders verify correctly after creation; SMB/NFS write test reliable
+- Perf: Backup/restore cancellable from the progress dialog
+- Change: Backups exclude __pycache__ and .pyc files
+- New: Backup folder selectable from the settings; current path shown in browser header
+- Fix: Browser returns to the overview from network roots; settings stay open after selection
+- Fix: Log Viewer strings no longer collide with backup strings
 v1.3.3
-- Fix: Favorites Manager now correctly locates and parses Kodi's favourites.xml
-- Fix: Addon leftovers confirmation text now accurately describes what is removed
+- Fix: Favorites Manager finds and parses favourites.xml correctly
 - New: Backup retention keeps only the newest backups per type
 v1.3.2
 - Golden Master / Release
 v1.3.2b
-- Fix: Backup restore writes settings and databases back to the correct userdata location
-- Fix: Fresh Start no longer deletes the XSCleaner addon or its dependencies
-- Fix: Database orphan cleanup no longer fails with an SQL syntax error (GROUP BY *)
-- Fix: Celebrity/Artist cache cleanup no longer clears the actorlink table
-- Fix: Favorites Manager correctly recognizes RunAddon entries and Kodi return parameters
-- Fix: Orphan artwork cleanup no longer treats image:// and remote URLs as broken
-- Fix: Auto-update check now parses version suffixes (e.g. 1.3.1b) and is run by the service
-- Fix: Search history cleanup actually clears recent searches in guisettings.xml
-- Fix: "Addons + Data" backup now includes addons and addon data (was data only)
-- Fix: Performance tips now match storage entries correctly in all languages
-- Fix: Startup Manager parses the JSON-RPC enabled state reliably; Kodi version detection no longer crashes when BuildVersion is unavailable
-- Fix: Sources check parses sources.xml only once and writes valid UTF-8 XML with proper indentation (Kodi 19 compatible)
-- Fix: Advanced settings XML is written with UTF-8 declaration, compatible with Python 3.8
-- Fix: Crash log subfolders are only removed when they actually contain crash dumps; freed space is now counted correctly
-- Fix: Log viewer reads only the tail of the log file instead of the whole file
-- Fix: Dashboard total now shows the actual home folder size
-- Fix: Auto cleanup is skipped when Kodi shuts down during the startup delay
-- Perf: Dashboard storage sizes are cached for 10 minutes and invalidated after cleanups
-- Perf: Thumbnail database rows are deleted in batches of 500 instead of one by one
-- Perf: Duplicate-row cleanup skips tables with more than 500k rows and logs duration
-- Perf: Empty-folder cleanup stops early when a pass removed nothing
-- Cleanup: Removed dead code, unused imports and 53 unused localization strings
+- Fix: Restore writes to the correct userdata location; Fresh Start keeps XSCleaner and protected addons
+- Fix: Database orphan cleanup SQL error; Celebrity/Artist cleanup keeps the actorlink table
+- Fix: Favorites Manager handles RunAddon/ActivateWindow entries; orphan artwork keeps remote URLs
+- Fix: Auto-update handles version suffixes; search history cleanup works; performance tips match in all languages
+- Fix: "Addons + Data" backup includes addons and data; dashboard total shows actual home size
+- Fix: Startup Manager, sources check, advanced settings XML, crash log and log viewer fixes
+- Perf: Dashboard sizes cached; faster thumbnail DB and duplicate-row cleanup
+- Cleanup: Removed dead code, unused imports and 53 unused strings
 v1.3.1b
-- Database optimization now requires a configured backup path
-- Database backups use the Backup &amp; Restore system format (restorable)
+- Change: Database optimization requires a configured backup path
+- Change: Database backups use the Backup &amp; Restore format
 v1.3.0b
-- HTTP/Image, weather, downloads, search history cache cleanup
-- Celebrity/Artist cache cleanup &amp; Textures13.db rebuild
-- Favorites Manager &amp; unused language cleanup
-- Performance tips, system addon protection, remote URL support
+- New: HTTP/Image, weather, downloads, search history cache cleanup
+- New: Celebrity/Artist cache cleanup and Textures13.db rebuild
+- New: Favorites Manager and unused language cleanup
+- New: Performance tips, system addon protection, remote URL support
 v1.2.0b
-- TMDBHelper cache database cleanup
-- Database Optimize sub-dialog now setting-aware
+- New: TMDBHelper cache database cleanup
+- Change: Database Optimize sub-dialog is setting-aware
 v1.1.0b
-- Activity logging with audit trail
-- Version-aware advanced settings editor (Kodi 19-20 vs 21+)
-- RAM detection for auto-calculated cache values
-- Settings now actually control menu visibility and execution
-- Service with interval-based auto cleanup
-- Cross-platform cache cleanup rewritten
-- German localization corrected
+- New: Activity logging with audit trail
+- Change: Version-aware advanced settings editor (Kodi 19-20 vs 21+)
+- New: RAM detection for auto-calculated cache values
+- Change: Settings control menu visibility; service with interval-based auto cleanup
+- Fix: Cross-platform cache cleanup rewritten; German localization corrected
 v1.0.0b
-- Initial release with cache, thumbnails, addons, packages, crash logs cleanup
-- Database optimization (VACUUM, integrity check)
-- Advanced Settings editor, Backup/Restore, Fresh Start
-- Dashboard, Log Viewer, Startup Manager, System Info
-- Auto cleanup service
-- German and English language support</news>
+- Initial release: cache/thumbnail/addon/package/crash log cleanup, database optimization, advanced settings editor, backup/restore, Fresh Start, dashboard, log viewer, startup manager, system info, auto cleanup service, DE/EN languages</news>
     <assets>
       <icon>resources/icon.png</icon>
       <fanart>resources/fanart.jpg</fanart>

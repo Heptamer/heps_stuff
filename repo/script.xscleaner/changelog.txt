@@ -1,3 +1,16 @@
+v1.3.7 (2026-08-05)
+- New: Scheduled automatic full backups — a new "Automatic backup" group in the Backup settings lets you enable a full backup that runs at a configurable interval (1-30 days, default 7) and hour (0-23, default 3). The service stays active and fires the backup silently at the scheduled time (a banner announces start/completion), tracked via a state file in the addon data folder
+- New: Missed-backup catch-up — if a scheduled backup did not run (Kodi was off at the scheduled time or the run failed), the next Kodi start asks whether to run a full backup now (yes/no dialog); declining skips that slot until the next interval, the scheduled state is independent of manual backups
+- Fix: Backup folder browser listed files instead of subfolders — the folder listing used vfs.listdir_dirs, which unpacked xbmcvfs.listdir() the wrong way around (Kodi returns folders first, files second), so every folder that contained files showed its files in the browser instead of its subdirectories (e.g. under Windows); the helper now reads the correct element and the browser shows directories again on all platforms, keeping the existing timeout protection and os.path fallback for network shares
+- New: "Choose this folder" is now the first entry of the folder browser and is shown highlighted (bold); a new "Edit Backup Path" entry jumps directly into the manual path input
+- New: The manual path input ("Enter path manually") is now pre-filled — with the configured backup path at the top-level overview, otherwise with the folder you are currently browsing
+- New: Navigating SMB/NFS/FTP folders (forward and back) shows a progress dialog ("Loading folder contents…") while the network scan runs — a network folder change can take a while, and the dialog tells the user XSCleaner is still working instead of showing an empty folder list; the same indicator covers the write check when choosing a network backup folder
+- Change: The folder browser hides hidden system folders whose name starts with "@" (e.g. @Recycle), so they no longer clutter the folder list
+
+v1.3.6 (2026-08-03)
+- Change: Dashboard storage sizes are no longer cached (measured fresh on every view) and the main menu is no longer cached by Kodi (`cacheToDisc=False`) — the storage overview always shows the current values immediately, e.g. right after a thumbnail cleanup; the current container is also refreshed after every cleanup
+- New: "Addon Storage" submenu — browse installed addons and addon data folders as Kodi list items, sorted by disk usage (largest first), with a total row per view; selecting an item shows its ID and size in a details dialog. Sizes are measured on first open (with a progress dialog) and cached for 10 minutes so reopening is instant; the cache is invalidated after addon/package cleanups and factory reset.
+
 v1.3.5 (2026-08-03)
 - Change: Backups are now stored as a single ZIP archive per backup type — built locally, verified, and uploaded as one file; no more per-file transfers that can hang on slow or dropped SMB/NFS/FTP shares
 - New: Restore downloads and verifies the ZIP (checksum test + size match), extracts it to a staging folder, and then swaps the restored data in atomically — a failed or cancelled restore leaves the original data untouched
