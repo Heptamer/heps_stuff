@@ -1,3 +1,7 @@
+v1.3.8 (2026-08-07)
+- Fix: Missed-backup catch-up now works reliably — the scheduled time is persisted in backup_state.json and moved forward after every handled slot (completed backup or declined prompt). Previously the schedule was recomputed on every start without an anchor and always pointed into the future, so the "run the missed backup now?" dialog never appeared on a fresh install or after a failed run
+- Fix: WebDAV (dav:// / davs://) backup folders can now be selected and created — Kodi's xbmcvfs.mkdirs only creates whole folder trees for local, SMB and NFS paths and rejects dav/davs with "CreateDirectoryEx called with an unsupported path"; XSCleaner now creates WebDAV folders one level at a time (MKCOL) and no longer trusts bogus remote file sizes during the write check and the upload size verification
+
 v1.3.7 (2026-08-05)
 - New: Scheduled automatic full backups — a new "Automatic backup" group in the Backup settings lets you enable a full backup that runs at a configurable interval (1-30 days, default 7) and hour (0-23, default 3). The service stays active and fires the backup silently at the scheduled time (a banner announces start/completion), tracked via a state file in the addon data folder
 - New: Missed-backup catch-up — if a scheduled backup did not run (Kodi was off at the scheduled time or the run failed), the next Kodi start asks whether to run a full backup now (yes/no dialog); declining skips that slot until the next interval, the scheduled state is independent of manual backups
