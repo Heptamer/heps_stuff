@@ -1,162 +1,343 @@
+v1.3.9 (2026-08-10)
+- New: WebDAV credentials (server URL, user name, password) are stored in the addon settings under Backup > WebDAV and injected into dav:///davs:// paths at run time — backups, restores and scheduled auto-backups no longer need credentials in the backup path URL. The backup folder browser gained a "WebDAV (Nextcloud/ownCloud)…" entry that starts at the configured server URL, a "Test WebDAV connection" button in the settings and help texts for every field. Existing davs://user:pass@... paths keep working unchanged.
+- New: WebDAV-Zugangsdaten (Server-URL, Benutzername, Passwort) werden in den Addon-Einstellungen unter Backup > WebDAV gespeichert und zur Laufzeit in dav://-/davs://-Pfade eingefügt — Backups, Wiederherstellungen und geplante Auto-Backups brauchen keine Zugangsdaten mehr in der Backup-Pfad-URL. Der Backup-Ordner-Browser hat einen neuen Eintrag "WebDAV (Nextcloud/ownCloud)…", der an der konfigurierten Server-URL startet, einen Button "WebDAV-Verbindung testen" in den Einstellungen und Hilfetexte für jedes Feld. Bestehende davs://benutzer:passwort@...-Pfade funktionieren unverändert weiter.
+- Fix: WebDAV (dav:// / davs://) backup destinations now use a native WebDAV client instead of Kodi's curl-based file access — on some servers (e.g. Nextcloud) Kodi reported a successful PUT without the file actually being persisted, so the write test failed and backup uploads/downloads were silently broken. Uploads and downloads (with progress and cancel), the write test (PUT + read-back + DELETE), folder creation (MKCOL), folder listing (PROPFIND), file size and delete now run over plain HTTP(S) with Basic auth; dav:///davs:// folders also appear in the backup folder browser navigation (".." works there now too). The URL options |verifypeer=false| and |verifyhost=false| are honoured for servers with self-signed certificates.
+- Fix: WebDAV-(dav:// / davs://)-Backup-Ziele nutzen jetzt einen nativen WebDAV-Client statt Kodis curl-basiertem Dateizugriff — auf manchen Servern (z. B. Nextcloud) meldete Kodi einen erfolgreichen PUT, ohne die Datei tatsächlich zu speichern, sodass der Schreibtest fehlschlug und Backup-Uploads/-Downloads still brachen. Uploads und Downloads (mit Fortschritt und Abbruch), der Schreibtest (PUT + Zurücklesen + DELETE), Ordnererstellung (MKCOL), Ordnerliste (PROPFIND), Dateigröße und Löschen laufen jetzt über direktes HTTP(S) mit Basic-Auth; dav://-/davs://-Ordner erscheinen außerdem in der Browser-Navigation des Backup-Ordners (".." funktioniert dort jetzt ebenfalls). Die URL-Optionen |verifypeer=false| und |verifyhost=false| werden für Server mit selbstsignierten Zertifikaten beachtet.
+- Fix: The Dropbox backup folder is no longer created doubled (xscleaner/xscleaner) — join() no longer re-appends the configured folder name when the base path is the root
+- Fix: Der Dropbox-Backup-Ordner wird nicht mehr doppelt angelegt (xscleaner/xscleaner) — join() hängt den konfigurierten Ordnernamen nicht mehr erneut an, wenn der Basispfad der Root ist
+- Fix: Backup downloads from network shares are read in chunks with a per-chunk timeout instead of one long blocking read — a dropped connection is now reported instead of hanging forever
+- Fix: Backup-Downloads von Netzwerkfreigaben werden in Blöcken mit einem Timeout pro Block gelesen statt in einem einzigen langen blockierenden Lesevorgang — eine abgerissene Verbindung wird nun gemeldet, statt dass der Vorgang für immer hängen bleibt
+- Fix: Dashboard storage overview scans the home folder exactly once (single walk with bucket counting) and shows the actually cleanable Temp/Cache sizes — preserved files (logs, etc.) are excluded consistently
+- Fix: Die Speicherübersicht im Dashboard durchsucht den Home-Ordner genau einmal (ein einziger Walk mit Bucket-Zählung) und zeigt die tatsächlich bereinigbaren Temp-/Cache-Größen — geschützte Dateien (Logs usw.) werden konsequent ausgeschlossen
+- Fix: Database orphan cleanup no longer touches tables with a PRIMARY KEY/UNIQUE index (e.g. actorlink) and deduplicates rows via a temp table
+- Fix: Die Bereinigung verwaister Datenbankzeilen berührt keine Tabellen mit PRIMARY-KEY-/UNIQUE-Index (z. B. actorlink) mehr und entfernt Duplikate über eine temporäre Tabelle
+- Fix: Thumbnail cleanup skips non-numeric file names instead of deleting them as "-1"; thumbnail DB operations honour the SQLite timeout
+- Fix: Die Thumbnail-Bereinigung überspringt nicht-numerische Dateinamen, statt sie als "-1" zu löschen; Datenbankoperationen für Thumbnails beachten das SQLite-Timeout
+- Fix: The database is backed up whenever the optimized run requires it — the backup requirement no longer depends on a separate flag
+- Fix: Die Datenbank wird immer dann gesichert, wenn der Optimierungslauf es erfordert — die Backup-Notwendigkeit hängt nicht mehr von einem separaten Flag ab
+- Fix: MyVideos database is located reliably via glob (newest MyVideos*.db) instead of a fixed file name
+- Fix: Die MyVideos-Datenbank wird zuverlässig per glob (neueste MyVideos*.db) gefunden, statt über einen festen Dateinamen
+- Fix: remove_empty_folders runs in a single pass; the activity log keeps only the last 200 detail entries; the last update check is only stored after a successful version fetch
+- Fix: remove_empty_folders läuft in einem einzigen Durchlauf; das Aktivitätsprotokoll behält nur die letzten 200 Detail-Einträge; der letzte Update-Check wird erst nach erfolgreichem Versionsabruf gespeichert
+- Fix: No progress dialogs are created in silent/automatic mode, so scheduled cleanups no longer flash a dialog
+- Fix: Im stillen/automatischen Modus werden keine Fortschrittsdialoge erstellt, sodass geplante Bereinigungen keinen Dialog mehr aufblitzen lassen
+- Perf: Backup ZIP size counting moved into the archiver (one walk instead of two); cache sizes computed from a single source (cache_dirs helper)
+- Perf: Die Zählung der Backup-ZIP-Größe wurde in den Archivierer verlegt (ein Walk statt zwei); Cache-Größen werden aus einer einzigen Quelle berechnet (cache_dirs-Helfer)
+- Cleanup: Removed dead code and unused helpers (count_files, get_total_size, dropbox.basename, unused size helpers, duplicate get_localized_string definition)
+- Cleanup: Toter Code und ungenutzte Helfer entfernt (count_files, get_total_size, dropbox.basename, ungenutzte Größen-Helfer, doppelte get_localized_string-Definition)
+- New: Optional Dropbox backup destination — "Dropbox" appears as an entry in the backup folder browser and selects the backup path dropbox://, storing the backups in your Dropbox app folder (free 2 GB plan supported). Authentication uses a never-expiring refresh token, so no re-login is ever required; the short-lived access token is fetched automatically with a 5-minute safety margin and cached in the addon data folder
+- New: Optionale Dropbox als Backup-Ziel — "Dropbox" erscheint als Eintrag im Backup-Ordnerbrowser und wählt den Backup-Pfad dropbox://, wobei die Backups im Dropbox-App-Ordner gespeichert werden (kostenloser 2-GB-Plan unterstützt). Die Authentifizierung nutzt ein nie ablaufendes Refresh-Token, sodass nie ein erneuter Login nötig ist; das kurzlebige Access-Token wird automatisch mit einem 5-Minuten-Sicherheitspuffer geholt und im Addon-Datenordner gecacht
+- New: Dropbox setup under Backup settings — enter the App Key, App Secret and the generated Refresh Token (new group "Dropbox"); a "Test Dropbox connection" button verifies upload, read-back and delete on the Dropbox folder; the optional "Dropbox folder" setting selects the subfolder inside the app folder (default "xscleaner")
+- New: Dropbox-Einrichtung unter den Backup-Einstellungen — App Key, App Secret und das erzeugte Refresh Token eingeben (neue Gruppe "Dropbox"); ein Button "Dropbox-Verbindung testen" prüft Upload, Zurücklesen und Löschen im Dropbox-Ordner; die optionale Einstellung "Dropbox-Ordner" wählt den Unterordner innerhalb des App-Ordners (Standard "xscleaner")
+- New: The helper script dropbox_token.py (included in the repository, run on any PC with Python 3) generates the never-expiring Refresh Token in one step and writes it to ~/Downloads/xscleaner_dropbox_tokens.txt
+- New: Das Helfer-Skript dropbox_token.py (im Repository enthalten, auf jedem PC mit Python 3 ausführbar) erzeugt das nie ablaufende Refresh Token in einem Schritt und schreibt es nach ~/Downloads/xscleaner_dropbox_tokens.txt
+- New: Large backups are uploaded in chunks (4 MB upload sessions), so full backups beyond the 140 MB single-upload limit also work; downloads stream in chunks, uploads/downloads honour the backup progress dialog and are cancellable
+- New: Große Backups werden in Blöcken hochgeladen (Upload-Sessions à 4 MB), sodass auch vollständige Backups über dem 140-MB-Single-Upload-Limit funktionieren; Downloads werden gestreamt, Uploads/Downloads beachten den Backup-Fortschrittsdialog und sind abbrechbar
+- Fix: Selecting a WebDAV (dav:// / davs://) backup folder no longer falsely reports "not writable" — Kodi's CFile::Exists and CFile::Stat are unreliable for WebDAV (curl "Weird server reply"), so the write check could not confirm the freshly uploaded probe file via xbmcvfs.exists/listdir/Stat even though the write itself succeeded; the probe is now verified by reading it back (GET), which works reliably on WebDAV and still catches shares that accept writes without persisting them
+- Fix: Die Auswahl eines WebDAV-(dav:// / davs://)-Backup-Ordners meldet nicht mehr fälschlich "nicht beschreibbar" — Kodis CFile::Exists und CFile::Stat sind bei WebDAV unzuverlässig (curl "Weird server reply"), daher konnte der Schreibtest die frisch hochgeladene Testdatei über xbmcvfs.exists/listdir/Stat nicht bestätigen, obwohl der Schreibvorgang selbst erfolgreich war; die Testdatei wird jetzt durch Zurücklesen (GET) verifiziert, was bei WebDAV zuverlässig funktioniert und trotzdem Freigaben erkennt, die Schreibvorgänge annehmen, ohne sie zu speichern
+- Fix: WebDAV folder creation is now reliable for not-yet-existing folders — directory existence checks in the MKCOL loop use a trailing-slash path (CDirectory::Exists, PROPFIND) instead of the bare path that goes through the broken CFile::Exists, so the deepest existing ancestor and created segments are detected correctly
+- Fix: Die Erstellung von WebDAV-Ordnern ist nun auch für noch nicht existierende Ordner zuverlässig — die Existenzprüfungen in der MKCOL-Schleife nutzen einen Pfad mit abschließendem Schrägstrich (CDirectory::Exists, PROPFIND) statt des nackten Pfads über das defekte CFile::Exists, sodass der tiefste existierende Vorfahr und erstellte Segmente korrekt erkannt werden
+- Fix: A failed write probe is now deleted from the share instead of leaving .xscleaner_write_test files behind
+- Fix: Eine fehlgeschlagene Schreibtestsdatei wird jetzt von der Freigabe gelöscht, statt .xscleaner_write_test-Dateien zurückzulassen
+- Change: Addon Storage sizes are no longer cached — both views (Addons and Addon Data) are measured fresh on every open (with progress dialog), so the displayed values are always current; a leftover xscleaner_addon_sizes.json from previous versions is removed automatically
+- Change: Die Addon-Speichergrößen werden nicht mehr gecacht — beide Ansichten (Addons und Addon-Daten) werden bei jedem Öffnen frisch gemessen (mit Fortschrittsdialog), sodass die angezeigten Werte immer aktuell sind; eine übrig gebliebene xscleaner_addon_sizes.json aus früheren Versionen wird automatisch entfernt
+
 v1.3.8 (2026-08-07)
 - Fix: Missed-backup catch-up now works reliably — the scheduled time is persisted in backup_state.json and moved forward after every handled slot (completed backup or declined prompt). Previously the schedule was recomputed on every start without an anchor and always pointed into the future, so the "run the missed backup now?" dialog never appeared on a fresh install or after a failed run
+- Fix: Das Nachholen versäumter Backups funktioniert nun zuverlässig — die geplante Zeit wird in backup_state.json gespeichert und nach jedem abgearbeiteten Slot nach vorne verschoben (abgeschlossenes Backup oder abgelehnter Hinweis). Bisher wurde der Zeitplan bei jedem Start ohne Anker neu berechnet und zeigte immer in die Zukunft, sodass der Dialog "Versäumtes Backup jetzt ausführen?" bei einer Neuinstallation oder nach einem fehlgeschlagenen Lauf nie erschien
 - Fix: WebDAV (dav:// / davs://) backup folders can now be selected and created — Kodi's xbmcvfs.mkdirs only creates whole folder trees for local, SMB and NFS paths and rejects dav/davs with "CreateDirectoryEx called with an unsupported path"; XSCleaner now creates WebDAV folders one level at a time (MKCOL) and no longer trusts bogus remote file sizes during the write check and the upload size verification
+- Fix: WebDAV-(dav:// / davs://)-Backup-Ordner können nun ausgewählt und angelegt werden — Kodis xbmcvfs.mkdirs erstellt komplette Ordnerbäume nur für lokale, SMB- und NFS-Pfade und lehnt dav/davs mit "CreateDirectoryEx called with an unsupported path" ab; XSCleaner erstellt WebDAV-Ordner jetzt eine Ebene nach der anderen (MKCOL) und vertraut beim Schreibtest und der Upload-Größenprüfung keinen irreführenden Remote-Dateigrößen mehr
 
 v1.3.7 (2026-08-05)
 - New: Scheduled automatic full backups — a new "Automatic backup" group in the Backup settings lets you enable a full backup that runs at a configurable interval (1-30 days, default 7) and hour (0-23, default 3). The service stays active and fires the backup silently at the scheduled time (a banner announces start/completion), tracked via a state file in the addon data folder
+- New: Geplante automatische Voll-Backups — eine neue Gruppe "Automatisches Backup" in den Backup-Einstellungen ermöglicht ein Voll-Backup, das in einem konfigurierbaren Intervall (1-30 Tage, Standard 7) und zu einer wählbaren Stunde (0-23, Standard 3) läuft. Der Dienst bleibt aktiv und führt das Backup still zum geplanten Zeitpunkt aus (ein Banner kündigt Start/Abschluss an), verfolgt über eine Zustandsdatei im Addon-Datenordner
 - New: Missed-backup catch-up — if a scheduled backup did not run (Kodi was off at the scheduled time or the run failed), the next Kodi start asks whether to run a full backup now (yes/no dialog); declining skips that slot until the next interval, the scheduled state is independent of manual backups
+- New: Nachholen versäumter Backups — wenn ein geplantes Backup nicht lief (Kodi war zum geplanten Zeitpunkt aus oder der Lauf schlug fehl), fragt der nächste Kodi-Start, ob jetzt ein Voll-Backup ausgeführt werden soll (Ja/Nein-Dialog); Ablehnen überspringt diesen Slot bis zum nächsten Intervall, der geplante Zustand ist unabhängig von manuellen Backups
 - Fix: Backup folder browser listed files instead of subfolders — the folder listing used vfs.listdir_dirs, which unpacked xbmcvfs.listdir() the wrong way around (Kodi returns folders first, files second), so every folder that contained files showed its files in the browser instead of its subdirectories (e.g. under Windows); the helper now reads the correct element and the browser shows directories again on all platforms, keeping the existing timeout protection and os.path fallback for network shares
+- Fix: Der Backup-Ordnerbrowser listete Dateien statt Unterordnern — die Ordnerliste nutzte vfs.listdir_dirs, das xbmcvfs.listdir() falsch herum entpackte (Kodi liefert zuerst Ordner, dann Dateien), sodass jeder Ordner mit Dateien im Browser seine Dateien statt seiner Unterverzeichnisse zeigte (z. B. unter Windows); der Helfer liest nun das richtige Element und der Browser zeigt auf allen Plattformen wieder Verzeichnisse, unter Beibehaltung des bestehenden Timeout-Schutzes und des os.path-Fallbacks für Netzwerkfreigaben
 - New: "Choose this folder" is now the first entry of the folder browser and is shown highlighted (bold); a new "Edit Backup Path" entry jumps directly into the manual path input
+- New: "Diesen Ordner wählen" ist jetzt der erste Eintrag des Ordnerbrowsers und wird hervorgehoben (fett) angezeigt; ein neuer Eintrag "Backup-Pfad bearbeiten" springt direkt in die manuelle Pfadeingabe
 - New: The manual path input ("Enter path manually") is now pre-filled — with the configured backup path at the top-level overview, otherwise with the folder you are currently browsing
+- New: Die manuelle Pfadeingabe ("Pfad manuell eingeben") ist nun vorausgefüllt — in der Übersicht mit dem konfigurierten Backup-Pfad, sonst mit dem Ordner, den Sie gerade durchsuchen
 - New: Navigating SMB/NFS/FTP folders (forward and back) shows a progress dialog ("Loading folder contents…") while the network scan runs — a network folder change can take a while, and the dialog tells the user XSCleaner is still working instead of showing an empty folder list; the same indicator covers the write check when choosing a network backup folder
+- New: Beim Navigieren durch SMB/NFS/FTP-Ordner (vor und zurück) wird während des Netzwerk-Scans ein Fortschrittsdialog ("Ordnerinhalt wird geladen…") angezeigt — ein Wechsel des Netzwerkordners kann dauern, und der Dialog zeigt dem Benutzer, dass XSCleaner noch arbeitet, statt eine leere Ordnerliste zu zeigen; derselbe Indikator deckt den Schreibtest bei der Auswahl eines Netzwerk-Backup-Ordners ab
 - Change: The folder browser hides hidden system folders whose name starts with "@" (e.g. @Recycle), so they no longer clutter the folder list
+- Change: Der Ordnerbrowser blendet versteckte Systemordner aus, deren Name mit "@" beginnt (z. B. @Recycle), damit sie die Ordnerliste nicht mehr überladen
 
 v1.3.6 (2026-08-03)
 - Change: Dashboard storage sizes are no longer cached (measured fresh on every view) and the main menu is no longer cached by Kodi (`cacheToDisc=False`) — the storage overview always shows the current values immediately, e.g. right after a thumbnail cleanup; the current container is also refreshed after every cleanup
+- Change: Die Dashboard-Speichergrößen werden nicht mehr gecacht (bei jeder Ansicht frisch gemessen) und das Hauptmenü wird von Kodi nicht mehr gecacht (`cacheToDisc=False`) — die Speicherübersicht zeigt die aktuellen Werte sofort, z. B. direkt nach einer Thumbnail-Bereinigung; der aktuelle Container wird außerdem nach jeder Bereinigung aktualisiert
 - New: "Addon Storage" submenu — browse installed addons and addon data folders as Kodi list items, sorted by disk usage (largest first), with a total row per view; selecting an item shows its ID and size in a details dialog. Sizes are measured on first open (with a progress dialog) and cached for 10 minutes so reopening is instant; the cache is invalidated after addon/package cleanups and factory reset.
+- New: Untermenü "Addon-Speicher" — installierte Addons und Addon-Datenordner als Kodi-Listeneinträge durchsuchen, sortiert nach Speicherverbrauch (größte zuerst), mit einer Gesamtzeile pro Ansicht; die Auswahl eines Eintrags zeigt ID und Größe in einem Detaildialog. Die Größen werden beim ersten Öffnen gemessen (mit Fortschrittsdialog) und 10 Minuten gecacht, sodass ein erneutes Öffnen sofort erfolgt; der Cache wird nach Addon-/Paket-Bereinigungen und Werksreset ungültig.
 
 v1.3.5 (2026-08-03)
 - Change: Backups are now stored as a single ZIP archive per backup type — built locally, verified, and uploaded as one file; no more per-file transfers that can hang on slow or dropped SMB/NFS/FTP shares
+- Change: Backups werden jetzt als ein einziges ZIP-Archiv pro Backup-Typ gespeichert — lokal erstellt, verifiziert und als eine Datei hochgeladen; keine Einzeldatei-Übertragungen mehr, die auf langsamen oder abgebrochenen SMB/NFS/FTP-Freigaben hängen bleiben können
 - New: Restore downloads and verifies the ZIP (checksum test + size match), extracts it to a staging folder, and then swaps the restored data in atomically — a failed or cancelled restore leaves the original data untouched
+- New: Wiederherstellung lädt die ZIP herunter und verifiziert sie (Prüfsummentest + Größenabgleich), entpackt sie in einen Staging-Ordner und tauscht die wiederhergestellten Daten dann atomar aus — eine fehlgeschlagene oder abgebrochene Wiederherstellung lässt die Originaldaten unberührt
 - Fix: All network file operations (stat, listdir, mkdirs, copy, delete, write test) now run with per-operation timeouts and report failures instead of hanging when a share drops mid-transfer
+- Fix: Alle Netzwerk-Dateioperationen (stat, listdir, mkdirs, copy, delete, Schreibtest) laufen jetzt mit Timeout pro Operation und melden Fehler, statt bei einer abgebrochenen Freigabe mitten in der Übertragung hängen zu bleiben
 - Change: Backup format changed to ZIP — older folder-based backups are no longer listed or restorable (not backward compatible by design)
+- Change: Das Backup-Format wurde auf ZIP umgestellt — ältere ordnerbasierte Backups werden nicht mehr aufgelistet oder sind nicht mehr wiederherstellbar (bewusst nicht abwärtskompatibel)
 - Fix: A backup that fails to upload is removed from the share instead of leaving a partial copy behind; retention now deletes old ZIP files
+- Fix: Ein Backup, das beim Upload scheitert, wird von der Freigabe entfernt, statt eine unvollständige Kopie zu hinterlassen; die Aufbewahrung löscht nun alte ZIP-Dateien
 - Fix: Backups no longer report a failure when optional files are missing (e.g. advancedsettings.xml, which Kodi only creates on demand) — such items are skipped and logged instead of aborting the backup; vfs type/size checks for local paths now use os.path and no longer misdetect missing files as regular files
+- Fix: Backups melden keinen Fehler mehr, wenn optionale Dateien fehlen (z. B. advancedsettings.xml, das Kodi nur bei Bedarf anlegt) — solche Einträge werden übersprungen und protokolliert, statt das Backup abzubrechen; vfs-Typ-/Größenprüfungen für lokale Pfade nutzen jetzt os.path und erkennen fehlende Dateien nicht mehr fälschlich als reguläre Dateien
 - Perf: File modification times are preserved in the archive and backup/restore show byte-based progress that can be cancelled from the dialog
+- Perf: Dateiänderungszeiten werden im Archiv bewahrt und Backup/Wiederherstellung zeigen bytebasierten Fortschritt, der über den Dialog abgebrochen werden kann
 - Fix: "Clean ALL thumbnails" reported "0.0 B freed" even though everything was deleted — os.walk ran top-down and each subfolder of the Thumbnails directory was removed wholesale via shutil.rmtree before the walk descended into it, so the files inside (where all thumbnails live in Kodi) were never counted; the cleanup now walks bottom-up, counts and deletes each file, then only removes the now-empty folders, so the freed space is reported correctly
+- Fix: "Alle Thumbnails bereinigen" meldete "0.0 B freigegeben", obwohl alles gelöscht wurde — os.walk lief von oben nach unten und jeder Unterordner des Thumbnails-Verzeichnisses wurde per shutil.rmtree komplett entfernt, bevor der Walk ihn betrat, sodass die Dateien darin (wo in Kodi alle Thumbnails liegen) nie gezählt wurden; die Bereinigung läuft jetzt von unten nach oben, zählt und löscht jede Datei und entfernt danach nur die jetzt leeren Ordner, sodass der freigegebene Speicher korrekt gemeldet wird
 - Fix: Crash log cleanup now also removes Kodi's own crash logs — kodi_crashlog-<date>_<time>.log in the Kodi data folder root (special://home/, e.g. ~/.kodi or ~/.var/app/tv.kodi.Kodi/data), plus kodi_crashlog-*.log and the kodi_crash.log symlink in the temp folder (special://temp/, e.g. LibreELEC's /storage/.kodi/temp); previously only .dmp/.crash dumps in userdata/crashlogs were removed, so the Linux crash logs in the .kodi root folder were never deleted; crash logs are only removed as files (no directories), and the confirmation text now describes the actual scope
+- Fix: Die Absturzprotokoll-Bereinigung entfernt jetzt auch Kodis eigene Absturz-Logs — kodi_crashlog-<datum>_<zeit>.log im Wurzelverzeichnis des Kodi-Datenordners (special://home/, z. B. ~/.kodi oder ~/.var/app/tv.kodi.Kodi/data), dazu kodi_crashlog-*.log und der kodi_crash.log-Symlink im Temp-Ordner (special://temp/, z. B. LibreELECs /storage/.kodi/temp); bisher wurden nur .dmp/.crash-Dumps in userdata/crashlogs entfernt, sodass die Linux-Absturz-Logs im .kodi-Wurzelordner nie gelöscht wurden; Absturz-Logs werden nur als Dateien entfernt (keine Verzeichnisse), und der Bestätigungstext beschreibt jetzt den tatsächlichen Umfang
 
 v1.3.4 (2026-08-02)
 - New: Backup & Restore now uses Kodi's VFS (xbmcvfs) and supports network shares (smb://, nfs://, ftp://) as backup destination — previously only local paths worked
+- New: Backup & Wiederherstellung nutzen jetzt Kodis VFS (xbmcvfs) und unterstützen Netzwerkfreigaben (smb://, nfs://, ftp://) als Backup-Ziel — bisher funktionierten nur lokale Pfade
 - New: "Select backup folder" in the Backup & Restore menu opens a custom folder browser listing the local filesystem, configured Kodi sources (including network sources from the file manager), browsable SMB/NFS/FTP locations and a manual path entry; the chosen path is saved as the backup path
+- New: "Backup-Ordner auswählen" im Menü Backup & Wiederherstellung öffnet einen eigenen Ordnerbrowser, der das lokale Dateisystem, konfigurierte Kodi-Quellen (einschließlich Netzwerkquellen aus dem Dateimanager), durchsuchbare SMB/NFS/FTP-Standorte und eine manuelle Pfadeingabe auflistet; der gewählte Pfad wird als Backup-Pfad gespeichert
 - Fix: Backup path starting with special:// is resolved before use; a non-writable backup path now shows an error and aborts instead of failing silently
+- Fix: Ein Backup-Pfad, der mit special:// beginnt, wird vor der Verwendung aufgelöst; ein nicht beschreibbarer Backup-Pfad zeigt jetzt einen Fehler und bricht ab, statt still zu scheitern
 - Fix: Write test now really verifies the write result and file creation — a share that creates folders but rejects file writes is now correctly reported as "not writable"
+- Fix: Der Schreibtest prüft jetzt wirklich das Schreibergebnis und die Dateierstellung — eine Freigabe, die Ordner anlegt, aber Dateien ablehnt, wird jetzt korrekt als "nicht beschreibbar" gemeldet
 - Fix: Addon logging works again on Kodi 19+ — xbmc.LOGNOTICE was removed in Kodi 19 and caused every log() call to fail silently (the addon had not logged anything since v1.1.0b on Kodi 19/20/21)
+- Fix: Das Addon-Logging funktioniert wieder auf Kodi 19+ — xbmc.LOGNOTICE wurde in Kodi 19 entfernt und führte dazu, dass jeder log()-Aufruf still scheiterte (das Addon hatte auf Kodi 19/20/21 seit v1.1.0b nichts mehr geloggt)
 - Fix: Error log entries now use LOGERROR instead of the semantically wrong LOGFATAL level
+- Fix: Fehlerprotokolleinträge verwenden jetzt LOGERROR statt des semantisch falschen LOGFATAL-Levels
 - Change: Write test now retries in a subfolder when the folder itself rejects file writes (folders can be created while file creation is denied by share ACLs) and verifies the result via a fresh directory listing
+- Change: Der Schreibtest versucht es jetzt in einem Unterordner erneut, wenn der Ordner selbst Dateien ablehnt (Ordner können angelegt werden, während die Dateierstellung durch Freigabe-ACLs verweigert wird), und prüft das Ergebnis über eine frische Verzeichnisliste
 - Fix: Backups copied no files to the share (folders only) when the source was a local folder — xbmcvfs exists/stat silently failed on the local directory path while os.path worked; vfs existence/type/size/listdir/mkdirs checks now fall back to os.path for local paths
+- Fix: Backups kopierten keine Dateien auf die Freigabe (nur Ordner), wenn die Quelle ein lokaler Ordner war — xbmcvfs exists/stat scheiterte still am lokalen Verzeichnispfad, während os.path funktionierte; vfs-Existenz-/Typ-/Größen-/listdir-/mkdirs-Prüfungen fallen bei lokalen Pfaden jetzt auf os.path zurück
 - Fix: File copies to the share failed for every file with "utf-8 codec can't decode byte ... invalid continuation byte" — xbmcvfs.File.read() decodes the file as UTF-8 (raises on binary data like .db/.bak); copies now read binary-safe via readBytes() for network sources and plain binary open() for local sources, so database backups actually reach the share
+- Fix: Dateikopien auf die Freigabe schlugen bei jeder Datei mit "utf-8 codec can't decode byte ... invalid continuation byte" fehl — xbmcvfs.File.read() dekodiert die Datei als UTF-8 (wirft bei Binärdaten wie .db/.bak); Kopien lesen jetzt binärsicher per readBytes() bei Netzwerkquellen und per einfachem binären open() bei lokalen Quellen, sodass Datenbank-Backups die Freigabe tatsächlich erreichen
 - Fix: Backups started from the Backup & Restore menu aborted with "cannot create directory" even though the backup folder was created on the share — xbmcvfs.mkdirs() returns CDirectory::Exists(), which uses Kodi's directory cache and can report False for a just-created SMB directory; the vfs mkdirs fallback now verifies the directory directly (cache-bypassing exists check plus parent listing retry) before reporting failure
+- Fix: Backups, die über das Menü Backup & Wiederherstellung gestartet wurden, brachen mit "cannot create directory" ab, obwohl der Backup-Ordner auf der Freigabe angelegt war — xbmcvfs.mkdirs() gibt CDirectory::Exists() zurück, das Kodis Verzeichniscache nutzt und für ein gerade erstelltes SMB-Verzeichnis False melden kann; der vfs-mkdirs-Fallback prüft das Verzeichnis jetzt direkt (cache-umgehende Existenzprüfung plus Listen-Wiederholung des Elternordners), bevor er einen Fehler meldet
 - Fix: xbmcvfs.stat() does not exist in Kodi 21 (it is the xbmcvfs.Stat class); vfs stat checks now use xbmcvfs.Stat(path) so file/folder type and size are detected correctly on network paths too (needed for restoring from a share and for the write test on shares)
+- Fix: xbmcvfs.stat() existiert in Kodi 21 nicht (es ist die Klasse xbmcvfs.Stat); vfs-stat-Prüfungen verwenden jetzt xbmcvfs.Stat(path), sodass Datei-/Ordner-Typ und Größe auch auf Netzwerkpfaden korrekt erkannt werden (nötig für die Wiederherstellung von einer Freigabe und für den Schreibtest auf Freigaben)
 - Change: Backup now logs every item with src, exists/isfile/isdir and the copy result — an empty backup can no longer hide the cause
+- Change: Das Backup protokolliert jetzt jeden Eintrag mit src, exists/isfile/isdir und dem Kopierergebnis — ein leeres Backup kann die Ursache nicht mehr verbergen
 - Change: Backup and restore can now be cancelled via the progress dialog's Cancel button — a cancelled run stops copying immediately and reports that it was cancelled instead of claiming success
+- Change: Backup und Wiederherstellung können jetzt über die Schaltfläche Abbrechen des Fortschrittsdialogs abgebrochen werden — ein abgebrochener Lauf stoppt das Kopieren sofort und meldet den Abbruch, statt Erfolg vorzutäuschen
 - Change: Backups no longer include __pycache__ directories and .pyc files (Python addon bytecode) — smaller, faster full backups; filtering is applied consistently to file counting and copying so progress/verification stay exact
+- Change: Backups enthalten keine __pycache__-Verzeichnisse und .pyc-Dateien mehr (Python-Addon-Bytecode) — kleinere, schnellere Voll-Backups; die Filterung wird konsequent auf Dateizählung und Kopieren angewendet, sodass Fortschritt/Verifizierung exakt bleiben
 - New: The backup folder can now be chosen from the addon settings (Backup category) — the same SMB/NFS/FTP-capable folder browser is launched via an action button instead of Kodi's limited native path dialog (the native row is hidden; the chosen path is pre-selected when the browser opens)
+- New: Der Backup-Ordner kann jetzt aus den Addon-Einstellungen (Kategorie Backup) gewählt werden — derselbe SMB/NFS/FTP-fähige Ordnerbrowser wird über eine Aktionsschaltfläche gestartet statt über Kodis eingeschränkten nativen Pfaddialog (die native Zeile ist ausgeblendet; beim Öffnen des Browsers ist der gewählte Pfad vorausgewählt)
 - Fix: Log Viewer strings (#32405-#32409) no longer collide with the backup progress/verification strings (#32400-#32404) that were introduced in this version — "No log directory found", "Log Viewer" etc. were shown as backup texts and vice versa
+- Fix: Die Log-Viewer-Texte (#32405-#32409) kollidieren nicht mehr mit den in dieser Version eingeführten Backup-Fortschritts-/Verifikationstexten (#32400-#32404) — "Kein Log-Verzeichnis gefunden", "Log-Viewer" usw. wurden als Backup-Texte angezeigt und umgekehrt
 - Fix: Backup folder browser could not return to the top-level overview (local drives, sources, SMB/NFS/FTP, manual path) from network roots — a ".." entry now leads back to the overview, e.g. when the browser starts at the stored backup path
+- Fix: Der Backup-Ordnerbrowser konnte von Netzwerk-Wurzeln nicht zur Übersicht der obersten Ebene (lokale Laufwerke, Quellen, SMB/NFS/FTP, manueller Pfad) zurückkehren — ein ".."-Eintrag führt jetzt zurück zur Übersicht, z. B. wenn der Browser am gespeicherten Backup-Pfad startet
 - Fix: Selecting a backup folder on SMB/NFS shares no longer falsely reports "not writable" — the write test verified the freshly written probe file via Kodi's directory listing (xbmcvfs.listdir), which is cached and can be stale right after the write (the write itself succeeded, the listing just did not show the file yet); the probe is now verified directly via a cache-bypassing exists check (with retry in case the listing is delayed) instead of the directory listing
+- Fix: Die Auswahl eines Backup-Ordners auf SMB/NFS-Freigaben meldet nicht mehr fälschlich "nicht beschreibbar" — der Schreibtest verifizierte die frisch geschriebene Testdatei über Kodis Verzeichnisliste (xbmcvfs.listdir), die gecacht ist und direkt nach dem Schreiben veraltet sein kann (das Schreiben selbst gelang, die Liste zeigte die Datei nur noch nicht); die Testdatei wird jetzt direkt über eine cache-umgehende Existenzprüfung verifiziert (mit Wiederholung, falls die Liste verzögert ist) statt über die Verzeichnisliste
 - Fix: After choosing the backup folder from the addon settings the settings window stays open — the "Select backup folder" button previously used RunAddon, which renders the plugin URL as a (empty) directory list after the addon finished, leaving the user on a blank Kodi window; the button now uses RunPlugin (no directory render) and no longer closes the settings dialog, so it returns to the Backup settings after selection
+- Fix: Nach der Auswahl des Backup-Ordners in den Addon-Einstellungen bleibt das Einstellungsfenster offen — die Schaltfläche "Backup-Ordner auswählen" nutzte bisher RunAddon, das nach dem Ende des Addons die Plugin-URL als (leere) Verzeichnisliste rendert und den Benutzer in einem leeren Kodi-Fenster zurücklässt; die Schaltfläche nutzt jetzt RunPlugin (kein Verzeichnis-Rendering) und schließt den Einstellungsdialog nicht mehr, sodass sie nach der Auswahl zu den Backup-Einstellungen zurückkehrt
 - New: The backup folder browser now shows the current folder path in the dialog header instead of a static title, so you always see where you are; credentials in remote URLs (e.g. smb://user:pass@host/...) are hidden in the header for display only
+- New: Der Backup-Ordnerbrowser zeigt jetzt den aktuellen Ordnerpfad im Dialogtitel statt eines statischen Titels, sodass man immer weiß, wo man sich befindet; Zugangsdaten in Remote-URLs (z. B. smb://benutzer:passwort@host/...) werden im Titel nur für die Anzeige ausgeblendet
 
 v1.3.3 (2026-08-02)
 - Fix: Favorites Manager now finds Kodi's favourites.xml — the file was previously searched under the wrong name (favorites.xml) and never found
+- Fix: Der Favoriten-Manager findet jetzt Kodis favourites.xml — die Datei wurde bisher unter dem falschen Namen (favorites.xml) gesucht und nie gefunden
 - Fix: Favorites Manager parses the actual favourites.xml structure (name attribute, command in element text) instead of a non-existent onclick attribute
+- Fix: Der Favoriten-Manager parst die tatsächliche favourites.xml-Struktur (name-Attribut, Befehl im Elementtext) statt eines nicht existierenden onclick-Attributs
 - Fix: Favorites Manager splits command arguments correctly so paths containing commas are no longer misparsed
+- Fix: Der Favoriten-Manager zerlegt Befehlsargumente korrekt, sodass Pfade mit Kommas nicht mehr falsch geparst werden
 - Fix: Addon leftovers confirmation now describes the actual behavior (only removes data of uninstalled addons and invalid addon folders, installed addons stay untouched)
+- Fix: Die Bestätigung der Addon-Reste beschreibt jetzt das tatsächliche Verhalten (entfernt nur Daten deinstallierter Addons und ungültiger Addon-Ordner, installierte Addons bleiben unberührt)
 - New: Backup retention — per backup type only the newest X backups are kept (slider 1-30, 0 = off, default 10); the oldest backups are removed after a new backup was created successfully
+- New: Backup-Aufbewahrung — pro Backup-Typ werden nur die neuesten X Backups behalten (Schieberegler 1-30, 0 = aus, Standard 10); die ältesten Backups werden entfernt, nachdem ein neues Backup erfolgreich erstellt wurde
 
 v1.3.2 (2026-08-01)
 - Golden Master / Release
+- Golden Master / Veröffentlichung
 
 v1.3.2b (2026-08-01)
 - Change: "Fresh Start" renamed to "Reset Kodi to factory defaults"; the menu item is now disabled by default (new setting, default off) and shows a clear warning that Kodi is completely reset except XSCleaner
+- Change: "Fresh Start" wurde in "Kodi auf Werkseinstellungen zurücksetzen" umbenannt; der Menüpunkt ist jetzt standardmäßig deaktiviert (neue Einstellung, Standard aus) und zeigt eine klare Warnung, dass Kodi vollständig zurückgesetzt wird, außer XSCleaner
 - Change: Unused language cleanup moved from Addon Leftovers to Package Cleanup; it now depends on "Clean Packages" and is displayed directly beneath it in the settings
+- Change: Die Bereinigung ungenutzter Sprachdateien wurde von Addon-Resten zu Paket-Bereinigung verschoben; sie hängt jetzt von "Pakete bereinigen" ab und wird in den Einstellungen direkt darunter angezeigt
 - Fix: Dashboard Temp/Cache sizes counted preserved log files (kodi.log etc.) that are never cleaned; sizes now reflect the actually cleanable space
+- Fix: Die Temp-/Cache-Größen im Dashboard zählten geschützte Logdateien (kodi.log usw.), die nie bereinigt werden; die Größen spiegeln jetzt den tatsächlich bereinigbaren Speicher wider
 - Fix: Startup Manager showed every service addon as disabled (enabled state read from the wrong JSON-RPC level)
+- Fix: Der Startup-Manager zeigte jedes Dienst-Addon als deaktiviert (Aktivierungsstatus von der falschen JSON-RPC-Ebene gelesen)
 - Fix: Backup restore writes settings, databases and addon data back to the correct userdata location (was restoring to the Kodi home root)
+- Fix: Die Backup-Wiederherstellung schreibt Einstellungen, Datenbanken und Addon-Daten an den korrekten userdata-Speicherort zurück (wurde bisher in die Kodi-Home-Wurzel wiederhergestellt)
 - Fix: Fresh Start preserved the wrong directories and could delete the XSCleaner addon itself; addons/ dir and protected addons are now always kept
+- Fix: Fresh Start schützte die falschen Verzeichnisse und konnte das XSCleaner-Addon selbst löschen; das addons/-Verzeichnis und geschützte Addons werden jetzt immer behalten
 - Fix: Database orphan cleanup used invalid SQL (GROUP BY *) which silently failed; rewritten with quoted column dedupe
+- Fix: Die Bereinigung verwaister Datenbankzeilen verwendete ungültiges SQL (GROUP BY *), das still scheiterte; neu geschrieben mit Dedupe über in Anführungszeichen gesetzte Spalten
 - Fix: Celebrity/Artist cache cleanup deleted the real actorlink table; now only celebrity/artist tables are cleared
+- Fix: Die Bereinigung des Celebrity-/Artist-Caches löschte die echte actorlink-Tabelle; jetzt werden nur noch Celebrity-/Artist-Tabellen geleert
 - Fix: Favorites Manager flagged valid favorites as broken (RunAddon args, ActivateWindow "return"/"noop" parameters); target extraction rewritten
+- Fix: Der Favoriten-Manager stufte gültige Favoriten als defekt ein (RunAddon-Args, ActivateWindow-Parameter "return"/"noop"); die Ziel-Extraktion wurde neu geschrieben
 - Fix: Orphan artwork cleanup treated image:// and http(s):// URLs as missing on disk; remote/special URLs are now preserved
+- Fix: Die Bereinigung verwaister Artworks behandelte image://- und http(s)://-URLs als auf der Platte fehlend; Remote-/special-URLs werden jetzt erhalten
 - Fix: Auto-update check crashed on version suffixes (e.g. 1.3.1b); now parsed correctly and actually invoked by the service
+- Fix: Der Auto-Update-Check stürzte bei Versionssuffixen ab (z. B. 1.3.1b); wird jetzt korrekt geparst und tatsächlich vom Dienst aufgerufen
 - Fix: Search history cleanup never matched Kodi's XML and did nothing; recent searches are now cleared correctly
+- Fix: Die Bereinigung des Suchverlaufs matchte Kodis XML nie und tat nichts; die letzten Suchanfragen werden jetzt korrekt gelöscht
 - Fix: "Addons + Data" backup type contained only addon data; now includes addons and addon data
+- Fix: Der Backup-Typ "Addons + Daten" enthielt nur Addon-Daten; er enthält jetzt Addons und Addon-Daten
 - Fix: Performance tips matched hardcoded English names against localized labels and never showed in German; now matched by string ID
+- Fix: Die Leistungstipps matchten hartkodierte englische Namen gegen lokalisierte Beschriftungen und zeigten nie auf Deutsch; jetzt werden sie per String-ID abgeglichen
 - Fix: Addon Leftovers menu item is hidden when both related settings are disabled
+- Fix: Der Menüpunkt Addon-Reste wird ausgeblendet, wenn beide zugehörigen Einstellungen deaktiviert sind
 - Fix: Unimplemented "Skins" backup type removed from the backup menu
+- Fix: Der nicht implementierte Backup-Typ "Skins" wurde aus dem Backup-Menü entfernt
 - Fix: maxtempo default raised to 1.6 to match its allowed minimum; Kodi version fallback adjusted
+- Fix: Der maxtempo-Standardwert wurde auf 1.6 angehoben, um dem zulässigen Minimum zu entsprechen; der Kodi-Versions-Fallback wurde angepasst
 - Fix: Addon startup manager parses the JSON-RPC response properly (enabled state), no longer fails on "enabled": true formatting
+- Fix: Der Addon-Startup-Manager parst die JSON-RPC-Antwort korrekt (Aktivierungsstatus) und scheitert nicht mehr an der Formatierung "enabled": true
 - Fix: Kodi version detection no longer crashes when System.BuildVersion is unavailable
+- Fix: Die Kodi-Versionserkennung stürzt nicht mehr ab, wenn System.BuildVersion nicht verfügbar ist
 - Fix: Sources check parses sources.xml only once and writes valid UTF-8 XML with indentation (Kodi 19 compatible)
+- Fix: Der Quellen-Check parst sources.xml nur einmal und schreibt gültiges UTF-8-XML mit Einrückung (Kodi-19-kompatibel)
 - Fix: Advanced settings XML written with UTF-8 declaration; indentation falls back gracefully on Python 3.8 (ET.indent missing)
+- Fix: Die advancedsettings-XML wird mit UTF-8-Deklaration geschrieben; die Einrückung greift auf Python 3.8 elegant auf einen Fallback zurück (ET.indent fehlt)
 - Fix: Crash log subfolders are only removed when they actually contain .dmp/.crash files; freed space for subfolders now counted correctly
+- Fix: Absturzprotokoll-Unterordner werden nur entfernt, wenn sie tatsächlich .dmp/.crash-Dateien enthalten; der freigegebene Speicher für Unterordner wird jetzt korrekt gezählt
 - Fix: Log viewer reads only the last 50 kB of a log instead of the whole file
+- Fix: Der Log-Viewer liest nur die letzten 50 kB eines Logs statt der gesamten Datei
 - Fix: Dashboard total now shows the actual home folder size (was sum of components)
+- Fix: Die Dashboard-Gesamtsumme zeigt jetzt die tatsächliche Größe des Home-Ordners (war die Summe der Komponenten)
 - Fix: Auto cleanup is skipped when Kodi shuts down during the startup delay (service abort respected)
+- Fix: Die Auto-Bereinigung wird übersprungen, wenn Kodi während der Startverzögerung herunterfährt (Dienstabbruch wird respektiert)
 - Perf: Dashboard storage sizes cached for 10 minutes, invalidated after cleanups and service runs
+- Perf: Dashboard-Speichergrößen werden 10 Minuten gecacht, nach Bereinigungen und Dienstläufen ungültig gemacht
 - Perf: Thumbnail database rows deleted in batches of 500 (IN clause) instead of one statement per file
+- Perf: Thumbnail-Datenbankzeilen werden in Stapeln von 500 gelöscht (IN-Klausel) statt einer Anweisung pro Datei
 - Perf: Duplicate-row cleanup skips tables with more than 500k rows and logs processing time
+- Perf: Die Duplikat-Bereinigung überspringt Tabellen mit mehr als 500.000 Zeilen und protokolliert die Verarbeitungszeit
 - Perf: Empty-folder cleanup stops early when a pass removed nothing
+- Perf: Die Leerordner-Bereinigung bricht früh ab, wenn ein Durchlauf nichts entfernt hat
 - Cleanup: Removed 53 unused localization strings, _get_temp_size duplication, updater dead ImportError branch, EXCLUDES + ADDON_ID duplicates
+- Cleanup: 53 ungenutzte Lokalisierungs-Strings entfernt, _get_temp_size-Duplikation, toter ImportError-Zweig im Updater, EXCLUDES- + ADDON_ID-Duplikate
 - Cleanup: Removed dead code (unused size helpers, test_logging, remove_dir/remove_file, set_setting, select_dialog, get_file_count, EXCLUDES_CLEAN, LOG_PRESERVE, BUFFER_MODE_LABELS)
+- Cleanup: Toten Code entfernt (ungenutzte Größen-Helfer, test_logging, remove_dir/remove_file, set_setting, select_dialog, get_file_count, EXCLUDES_CLEAN, LOG_PRESERVE, BUFFER_MODE_LABELS)
 - Cleanup: Unified logging through utils.log (was four different implementations)
+- Cleanup: Logging über utils.log vereinheitlicht (waren vier verschiedene Implementierungen)
 - Cleanup: Addon/Dialog/Progress singletons in utils are now created lazily
+- Cleanup: Addon-/Dialog-/Progress-Singletons in utils werden jetzt lazy erstellt
 - Cleanup: Startup Manager JSON-RPC built via json.dumps (no more string concatenation)
+- Cleanup: Startup-Manager-JSON-RPC wird per json.dumps erstellt (keine String-Konkatenation mehr)
 - Cleanup: Removed all unused imports and duplicate storage-info code
+- Cleanup: Alle ungenutzten Importe und doppelten Storage-Info-Code entfernt
 
 v1.3.1b (2026-07-30)
 - Change: Database optimization now requires a configured backup path
+- Change: Die Datenbank-Optimierung erfordert jetzt einen konfigurierten Backup-Pfad
 - Change: Database backups during optimization use Backup & Restore system format
+- Change: Datenbank-Backups während der Optimierung verwenden das Backup-&-Wiederherstellungs-Format
 - Fix: Backups are now stored in the configured backup_path (xscleaner_databases_*)
+- Fix: Backups werden jetzt im konfigurierten backup_path gespeichert (xscleaner_databases_*)
 - Fix: Backup during optimization is actually executed (was silently skipped)
+- Fix: Das Backup während der Optimierung wird tatsächlich ausgeführt (wurde still übersprungen)
 
 v1.3.0b (2026-07-30)
 - New: HTTP/Image cache cleanup as sub-option of Cache Cleanup
+- New: HTTP-/Bild-Cache-Bereinigung als Unteroption der Cache-Bereinigung
 - New: Weather addon cache cleanup as sub-option of Cache Cleanup
+- New: Cache-Bereinigung des Wetter-Addons als Unteroption der Cache-Bereinigung
 - New: Downloads cleanup as sub-option of Cache Cleanup
+- New: Downloads-Bereinigung als Unteroption der Cache-Bereinigung
 - New: Search history cleanup as sub-option of Cache Cleanup
+- New: Suchverlaufs-Bereinigung als Unteroption der Cache-Bereinigung
 - New: Celebrity/Artist cache cleanup in Database Optimize
+- New: Celebrity-/Artist-Cache-Bereinigung in Datenbank-Optimierung
 - New: Textures13.db rebuild (backup + delete) in Database Optimize
+- New: Textures13.db-Neuaufbau (Backup + Löschen) in Datenbank-Optimierung
 - New: Unused language file cleanup in Addon Leftovers
+- New: Bereinigung ungenutzter Sprachdateien in Addon-Resten
 - New: Favorites Manager – detect and remove broken favorites entries
+- New: Favoriten-Manager – defekte Favoriteneinträge erkennen und entfernen
 - New: Performance tips displayed in System Info dashboard
+- New: Leistungstipps im System-Info-Dashboard angezeigt
 - New: System addon protection (scan special://xbmc/addons to prevent deletion of peripheral.*, skin.* etc.)
+- New: System-Addon-Schutz (Scan von special://xbmc/addons, um das Löschen von peripheral.*, skin.* usw. zu verhindern)
 - New: Remote URL support in Sources Check (skips os.path.exists for http://, smb:// etc.)
+- New: Remote-URL-Unterstützung im Quellen-Check (überspringt os.path.exists für http://, smb:// usw.)
 - New: remove_empty_folders centralized in utils.py, auto-runs after cache/addon cleanups
+- New: remove_empty_folders in utils.py zentralisiert, läuft automatisch nach Cache-/Addon-Bereinigungen
 - Change: Cache sub-options (HTTP, weather, downloads, search) are dependencies of Clean Cache
+- Change: Cache-Unteroptionen (HTTP, Wetter, Downloads, Suche) sind Abhängigkeiten von Cache bereinigen
 - Fix: Remove empty folders reusable across modules
+- Fix: Leere Ordner entfernen ist modulübergreifend wiederverwendbar
 
 v1.2.0b (2026-07-29)
 - New: TMDBHelper cache database cleanup integrated into Database Optimize
+- New: Bereinigung der TMDBHelper-Cache-Datenbank in Datenbank-Optimierung integriert
 - New: db_clean_tmdbhelper setting (Database Options)
+- New: Einstellung db_clean_tmdbhelper (Datenbank-Optionen)
 - Fix: Database Optimize sub-dialog now only shows options whose settings are enabled
+- Fix: Der Unterdialog der Datenbank-Optimierung zeigt nur noch Optionen, deren Einstellungen aktiviert sind
 
 v1.1.0b (2026-07-28)
 - Activity logging with SQLite database (two-level UI: list + details)
+- Aktivitätsprotokoll mit SQLite-Datenbank (zweistufige Oberfläche: Liste + Details)
 - All cleanup modules now call log_action() with detail_paths
+- Alle Bereinigungsmodule rufen jetzt log_action() mit detail_paths auf
 - Version-aware advanced settings editor (Kodi 19-20: cache settings, 21+: deprecation notice)
+- Versionsabhängiger Advanced-Settings-Editor (Kodi 19-20: Cache-Einstellungen, 21+: Verfallshinweis)
 - Single-page advanced settings menu with help texts and looping dialog
+- Einseitiges Advanced-Settings-Menü mit Hilfetexten und Schleifendialog
 - RAM detection for auto-calculating cache values
+- RAM-Erkennung zur automatischen Berechnung der Cache-Werte
 - Settings now actually control behavior (is_setting_enabled helper)
+- Einstellungen steuern jetzt tatsächlich das Verhalten (is_setting_enabled-Helfer)
 - Disabled cleanup menu items hidden from main menu
+- Deaktivierte Bereinigungs-Menüpunkte werden im Hauptmenü ausgeblendet
 - Service respects all settings (has_work check)
+- Der Dienst respektiert alle Einstellungen (has_work-Prüfung)
 - Network/Video/Samba settings added to advancedsettings editor
+- Netzwerk-/Video-/Samba-Einstellungen zum Advanced-Settings-Editor hinzugefügt
 - New auto_cleanup_interval_days setting (0-30 days, prevents repeated cleanup)
+- Neue Einstellung auto_cleanup_interval_days (0-30 Tage, verhindert wiederholte Bereinigung)
 - Cross-platform cache cleanup rewritten (temp, addon_data caches/temps, addons temp)
+- Plattformübergreifende Cache-Bereinigung neu geschrieben (temp, addon_data-Caches/Temps, addons-Temp)
 - All hardcoded English strings replaced with get_localized_string()
+- Alle hartkodierten englischen Strings durch get_localized_string() ersetzt
 - German umlauts corrected throughout
+- Deutsche Umlaute durchgehend korrigiert
 - yesno_dialog and _format_bool use localized button labels
+- yesno_dialog und _format_bool verwenden lokalisierte Schaltflächenbeschriftungen
 - RAM detection now parses "MB" suffix correctly
+- RAM-Erkennung parst das Suffix "MB" jetzt korrekt
 - Cache dialog duplicate heading fixed
+- Doppelte Überschrift im Cache-Dialog behoben
 - Service log level reduced to LOGINFO
+- Dienst-Loglevel auf LOGINFO reduziert
 - Activity log DB schema migration (ALTER TABLE ADD COLUMN)
+- Schema-Migration der Aktivitätsprotokoll-DB (ALTER TABLE ADD COLUMN)
 - README.md with comprehensive two-language documentation
+- README.md mit umfassender zweisprachiger Dokumentation
 
 v1.0.0b (2026-07-26)
 - Initial release
+- Erste Veröffentlichung
 - Cache & Temp cleanup
+- Cache- & Temp-Bereinigung
 - Thumbnails cleanup (unused, old, orphan)
+- Thumbnail-Bereinigung (ungenutzt, alt, verwaist)
 - Addon leftover removal
+- Entfernung von Addon-Resten
 - Package cleanup
+- Paket-Bereinigung
 - Crash log cleanup
+- Absturzprotokoll-Bereinigung
 - Database optimization (VACUUM, integrity check)
+- Datenbank-Optimierung (VACUUM, Integritätsprüfung)
 - Advanced Settings editor
+- Advanced-Settings-Editor
 - Backup / Restore
+- Backup / Wiederherstellung
+- Fresh Start
 - Fresh Start
 - Dashboard with storage overview
+- Dashboard mit Speicherübersicht
 - Log Viewer
+- Log-Viewer
 - Startup Manager
+- Startup-Manager
 - System Info
+- Systeminfo
 - Auto cleanup service
+- Auto-Bereinigungsdienst
 - German and English language support
+- Deutsche und englische Sprachunterstützung
