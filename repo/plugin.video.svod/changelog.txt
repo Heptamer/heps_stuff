@@ -1,4 +1,15 @@
-[B]Version: 1.5.1[/B]
+[B]Version: 1.5.3[/B]
+
+20.09.2026
+- Neu: Einstellung "Filme und Serien alphabetisch sortieren" (VOD/Serien inkl. Favoriten)
+- Fix: Suchfenster brauchte ewig um bei Abbruch zu schließen
+- Fix: TV Suche entfernt, ist nicht sinnvoll (Code für zukünftige Nutzung behalten)
+- Neu: Globale Suche über alle Portale für Filme und Serien (auch von externen Addons aufrufbar), noch beta
+
+17.09.2026
+- Alle Einstellungen mit Hilfetexten bestückt
+- Fix: Staffeln und Episoden sind nun immer abgesteigend sortiert
+- Fix: Suche nach Serien endete in einer Endlosschleife
 
 05.09.2026
 - Fix: EPG 503-Fehler bei parallelen Short-EPG Anfragen behoben (Retry mit Backoff bei 429/5xx)
